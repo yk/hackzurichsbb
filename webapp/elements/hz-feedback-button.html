@@ -1,0 +1,37 @@
+<link rel="import" href="/bower/polymer/polymer.html"/>
+<link rel="import" href="/bower/paper-item/paper-item.html"/>
+<link rel="import" href="/bower/paper-item/paper-icon-item.html"/>
+<link rel="import" href="/bower/paper-item/paper-item-body.html"/>
+<link rel="import" href="/bower/iron-icon/iron-icon.html"/>
+<link rel="import" href="/bower/paper-dialog/paper-dialog.html"/>
+<link rel="import" href="/bower/paper-button/paper-button.html"/>
+<link rel="import" href="/bower/paper-icon-button/paper-icon-button.html"/>
+<link href="/bower/iron-icons/iron-icons.html" rel="import">
+
+<dom-module id="hz-feedback-button">
+    <style>
+        paper-material{
+            border-radius: 50%;
+        }
+    </style>
+    <template>
+        <paper-material elevation="1">
+            <paper-icon-button icon="feedback" on-click="_feedback"></paper-icon-button>
+        </paper-material>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'hz-feedback-button',
+
+            properties: {
+                section: Object,
+            },
+
+            _feedback: function(){
+                this.fire('feedback-requested', {section:this.section});
+            },
+
+        });
+    </script>
+</dom-module>

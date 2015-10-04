@@ -1,0 +1,73 @@
+<link rel="import" href="/bower/polymer/polymer.html"/>
+<link rel="import" href="/bower/paper-item/paper-item.html"/>
+<link rel="import" href="/bower/paper-item/paper-icon-item.html"/>
+<link rel="import" href="/bower/paper-item/paper-item-body.html"/>
+<link rel="import" href="/bower/iron-icon/iron-icon.html"/>
+<link rel="import" href="/bower/iron-list/iron-list.html"/>
+
+
+<dom-module id="hz-train-indicator">
+    <style>
+        :host {
+            margin: 0 1em;
+        }
+        .indicator-container {
+            display: inline-block;
+        }
+        .indicator {
+            display: inline-block;
+            width: 3em !important;
+            height: 1.3em;
+            text-align: center;
+            overflow: hidden;
+            background: #ccc;
+        }
+        .contlabel{
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        .blue {
+            background-color: var(--paper-light-blue-300);
+        }
+        .red {
+            background-color: var(--paper-red-300);
+        }
+        .orange {
+            background-color: var(--paper-amber-300);
+        }
+        .green {
+            background-color: var(--paper-green-300);
+        }
+        .darkgreen {
+            background-color: var(--paper-green-800);
+        }
+    </style>
+    <template>
+        <div layout horizontal class="indicator-container">
+            <template is="dom-repeat" items="[[connection.sections]]" as="section">
+                <div class$="[[_getClasses(section)]]" item-icon><div class="contlabel">[[_label(section)]]</div></div>
+            </template>
+        </div>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'hz-train-indicator',
+
+            properties: {
+                connection: Object,
+            },
+
+            _getClasses: function(section){
+                var color = window.get_handicap_color(section.handicap);
+                return "indicator " + color;
+            },
+
+            _label: function(section){
+                var label = window.get_handicap_icon(section.handicap);
+                return label;
+            },
+
+        });
+    </script>
+</dom-module>

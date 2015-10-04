@@ -1,0 +1,35 @@
+<link rel="import" href="/bower/polymer/polymer.html"/>
+
+<dom-module id="hz-handicap">
+    <template>
+        <span>[[text]]</span>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'hz-handicap',
+
+            properties: {
+                code: String,
+                text: {
+                    type: String,
+                    computed: '_text(code)',
+                },
+            },
+
+            _text: function(code){
+                if(!code){
+                    return "";
+                }
+                var codes = {
+                    "full":"Fully accessible",
+                    "restricted":"Difficult",
+                    "assisted":"Reservation needed",
+                    "none":"Inaccessible",
+                };
+                return codes[code];
+            },
+
+        });
+    </script>
+</dom-module>

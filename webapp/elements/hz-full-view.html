@@ -1,0 +1,198 @@
+<link rel="import" href="/bower/polymer/polymer.html"/>
+<link rel="import" href="/bower/iron-list/iron-list.html"/>
+<link rel="import" href="/bower/iron-icon/iron-icon.html"/>
+<link rel="import" href="/bower/google-map/google-map.html"/>
+<link rel="import" href="/bower/paper-button/paper-button.html"/>
+
+<link rel="import" href="/elements/hz-section.html"/>
+
+<dom-module id="hz-full-view">
+    <style>
+        google-map {
+            height: 500px;
+            width: 85%;
+            margin: 2em;
+        }
+        hz-section{
+            padding-bottom: 0.5em;
+            border-bottom: 1px solid lightgray;
+        }
+        #book{
+            background-color: lightcoral;
+            color: white;
+            font-size: 0.8em;
+            float: right;
+        }
+    </style>
+    <template>
+        <paper-button id="book" raised on-click="_book">
+            <iron-icon icon="star"></iron-icon>
+            <span>Book</span>
+        </paper-button>
+        <h2>
+            Sections
+        </h2>
+        <iron-list items="[[connection.sections]]" as="section">
+            <template>
+                <hz-section section="[[section]]"></hz-section>
+            </template>
+        </iron-list>
+        <google-map latitude="47.741434" longitude="6.224329" zoom="8"></google-map>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'hz-full-view',
+
+            behaviors: [
+                Polymer.NeonAnimatableBehavior
+            ],
+
+            properties: {
+                connection: {
+                    type: Object,
+                    observer: '_connectionChanged',
+                },
+                markers: Array,
+                lines: Array,
+            },
+
+            _markers: function(connection){
+                var markers = _.map(connection.sections, function(section){
+                    return _.extend(section.departure.location.coordinate,{'name':section.departure.station.name, 'list':section.deplist});
+                });
+                if(!!connection.sections) {
+                    markers.push(_.extend(connection.sections[connection.sections.length - 1].arrival.location.coordinate, {'name':connection.sections[connection.sections.length-1].arrival.station.name, 'list':connection.sections[connection.sections.length-1].arrlist}));
+                }
+                var mrkrs = _.map(markers, function(m){
+                    return {lat: m.x, lng: m.y, name: m.name, list: m.list};
+                });
+                return mrkrs;
+            },
+
+            _lines: function(connection){
+                var lines = _.map(connection.sections, function(section){
+                    return {path:[
+                        {lat: section.departure.location.coordinate.x, lng: section.departure.location.coordinate.y},
+                        {lat: section.arrival.location.coordinate.x, lng: section.arrival.location.coordinate.y},
+                    ], handicap: section.handicap, list: section.pdflist};
+                });
+                return lines;
+            },
+
+            _connectionChanged: function(connection){
+                if(!connection.sections){
+                    return;
+                }
+                var map = document.querySelector('google-map');
+                if(!!this.lines){
+                    _.forEach(this.lines, function(l){
+                        l.setMap(null);
+                    });
+                }
+                if(!!this.markers){
+                    _.forEach(this.markers, function(m){
+                        m.setMap(null);
+                    });
+                }
+                var lines = this._lines(connection);
+                this.lines = _.map(lines, function(line){
+                    var flightPath = new google.maps.Polyline({
+                        path: line.path,
+                        geodesic: true,
+                        strokeColor: window.get_handicap_color(line.handicap),
+                        strokeOpacity: 1.0,
+                        strokeWeight: 5
+                    });
+                    flightPath.setMap(map.map);
+                    var contentString = '<div id="content">'+
+                            '<div id="siteNotice">'+
+                            '</div>'+
+                            '<h1 id="firstHeading" class="firstHeading">Train info</h1>'+
+                            '<div id="bodyContent">'+
+                            '<ul>';
+                    _.forEach(line.list, function(el){
+                        contentString += '<li>' + el + '</li>';
+                    });
+
+                    contentString += '</ul>'+
+                            '</div>'+
+                            '</div>';
+                    var iw = new google.maps.InfoWindow({
+                        content: contentString
+                    });
+                    flightPath.addListener('click', function() {
+                        iw.open(map.map, flightPath);
+                    });
+                    return flightPath;
+                });
+                var markers = this._markers(connection);
+                this.markers = _.map(markers, function(marker){
+                    var m = new google.maps.Marker({
+                        position: marker,
+                        map: map.map,
+                        title: marker.name
+                    });
+                    var contentString = '<div id="content">'+
+                            '<div id="siteNotice">'+
+                            '</div>'+
+                            '<h1 id="firstHeading" class="firstHeading">Train station info</h1>'+
+                            '<div id="bodyContent">'+
+                            '<ul>';
+                    _.forEach(marker.list, function(el){
+                        contentString += '<li>' + el + '</li>';
+                    });
+
+                        contentString += '</ul>'+
+                            '</div>'+
+                            '</div>';
+                    var iw = new google.maps.InfoWindow({
+                        content: contentString
+                    });
+                    m.addListener('click', function() {
+                        iw.open(map.map, m);
+                    });
+                    return m;
+                });
+
+
+//                map.map.fitBounds(this.markers.reduce(function(bounds, marker) {
+//                    return bounds.extend(marker.getPosition());
+//                }, new google.maps.LatLngBounds()));
+//                var listener = google.maps.event.addListener(map.map, "idle", function() {
+//                    if (map.map.getZoom() > 16) map.map.setZoom(16);
+//                    google.maps.event.removeListener(listener);
+//                });z
+
+                window.setTimeout(function() {
+                    var evt = document.createEvent('HTMLEvents');
+                    evt.initEvent('resize', true, false);
+                    window.dispatchEvent(evt)
+                },2000);
+            },
+
+            _book: function(){
+            	var nowData = new Date();
+            	
+                var connection = this.connection;
+                connection.ourID = nowData.getTime();
+		if(!localStorage.bookingList){
+		localStorage.bookingList= JSON.stringify([{"data":connection,"feedback":false}]);
+		}
+		else{
+	    oldList = JSON.parse(localStorage["bookingList"]);
+		oldList[oldList.length]={"data":connection,"feedback":false}
+		localStorage.bookingList= JSON.stringify(oldList);
+		}
+		
+
+				setTimeout(function(e){ var event = new CustomEvent("notifyuser", { "detail": JSON.stringify(connection) }  );
+							document.querySelector("hz-app").dispatchEvent(event);  } , (connection.to.arrivalTimestamp - nowData.getTime()/1000 +340)*1000 ); //Debug presentation 5000
+					
+              
+            },
+
+
+        });
+    </script>
+</dom-module>

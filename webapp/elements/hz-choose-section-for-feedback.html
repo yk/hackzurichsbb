@@ -1,0 +1,72 @@
+<link rel="import" href="/bower/polymer/polymer.html"/>
+<link rel="import" href="/bower/paper-input/paper-input.html"/>
+<link rel="import" href="/bower/paper-item/paper-item.html"/>
+<link rel="import" href="/bower/paper-item/paper-icon-item.html"/>
+<link rel="import" href="/bower/paper-item/paper-item-body.html"/>
+<link rel="import" href="/bower/iron-icon/iron-icon.html"/>
+<link rel="import" href="/bower/paper-dialog/paper-dialog.html"/>
+<link rel="import" href="/bower/paper-button/paper-button.html"/>
+<link rel="import" href="/bower/paper-toast/paper-toast.html"/>
+
+<dom-module id="hz-choose-section-for-feedback">
+    <style>
+        iron-list{
+            margin-left:1em;
+        }
+        paper-item{
+            border-bottom: 1px solid lightgray;
+            cursor: pointer;
+        }
+    </style>
+    <template>
+        <paper-dialog id="dialog" modal>
+            <h2>Feedback:&nbsp;<span>[[_title(connection)]]</span></h2>
+            <paper-dialog-scrollable>
+                <label>Which section would you like to give feedback to?</label>
+                <iron-list items="[[connection.sections]]">
+                    <template>
+                        <paper-item on-click="_click">[[_ttl(item)]]</paper-item>
+                    </template>
+                </iron-list>
+            </paper-dialog-scrollable>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Cancel</paper-button>
+            </div>
+        </paper-dialog>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'hz-choose-section-for-feedback',
+
+            properties: {
+                connection: Object,
+            },
+
+            _title: function(section){
+                if(!section)
+                    return "";
+                return section.from.station.name + " - " + section.to.station.name;
+            },
+
+            _ttl: function(section){
+                if(!section)
+                    return "";
+                return section.departure.station.name + " - " + section.arrival.station.name;
+            },
+
+            _click: function(event){
+                this.$.dialog.close();
+                if(!!this.connection.ourID) {
+                    markAsResponded(this.connection.ourID);
+                }
+                this.fire('feedback-requested',{section: event.model.item})
+            },
+
+            open: function(){
+                this.$.dialog.open();
+            },
+
+        });
+    </script>
+</dom-module>

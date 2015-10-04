@@ -1,0 +1,159 @@
+<link rel="import" href="/bower/neon-animation/neon-animatable-behavior.html"/>
+<link rel="import" href="/bower/iron-form/iron-form.html"/>
+<link rel="import" href="/bower/iron-ajax/iron-ajax.html"/>
+<link rel="import" href="/bower/iron-list/iron-list.html"/>
+<link rel="import" href="/bower/paper-input/paper-input.html"/>
+<link rel="import" href="/bower/paper-typeahead-input/paper-typeahead-input.html"/>
+<link rel="import" href="/bower/paper-button/paper-button.html"/>
+<link rel="import" href="/bower/paper-item/paper-item.html"/>
+<link rel="import" href="/bower/paper-material/paper-material.html"/>
+<link rel="import" href="/bower/paper-item/paper-item-body.html"/>
+<link rel="import" href="/bower/neon-animation/neon-animated-pages.html"/>
+<link rel="import" href="/bower/neon-animation/neon-animations.html"/>
+
+<link rel="import" href="/elements/hz-time.html"/>
+<link rel="import" href="/elements/hz-date-picker.html"/>
+<link rel="import" href="/elements/hz-time-picker.html"/>
+<link rel="import" href="/elements/hz-train-indicator.html"/>
+
+<dom-module id="hz-home">
+    <style>
+        neon-animated-pages {
+            height: 100%;
+        }
+
+        #result-list {
+            margin: 1em 0;
+        }
+
+        .result-item {
+            padding-bottom: 0.5em;
+            border-bottom: 1px solid lightgray;
+            cursor: pointer;
+        }
+
+    </style>
+    <template>
+        <iron-ajax id="ajax" url="[[_getUrl('/api/route')]]" handle-as="json" last-response="{{response}}" loading="{{loading}}"></iron-ajax>
+        <form is="iron-form">
+            <paper-typeahead-input name="start" placeholder="Start" input-value="{{start}}"
+                                   remote-url="[[_getUrl('/api/search?query=%QUERY')]]"
+                                   max-suggestions="4"></paper-typeahead-input>
+            <paper-typeahead-input name="end" placeholder="End" input-value="{{end}}"
+                                   remote-url="[[_getUrl('/api/search?query=%QUERY')]]"
+                                   max-suggestions="4"></paper-typeahead-input>
+            <hz-date-picker name="date" label="Date" value="{{date}}"></hz-date-picker>
+            <hz-time-picker name="time" label="Time" value="{{time}}"></hz-time-picker>
+            <paper-button raised on-click="search" disabled="[[_cannotSearch(start, end)]]">
+                <span hidden$="[[loading]]">Search</span>
+                <img src="/ajax-loader.gif" alt="loader" hidden$="[[notloading]]">
+            </paper-button>
+        </form>
+        <paper-material id="result-list">
+        <iron-list items="[[response.connections]]" as="connection">
+            <template>
+                <paper-item class="result-item" on-click="_onItemClick">
+                    <paper-item-body two-line>
+                        <div>
+                            <hz-time timestamp="[[connection.from.departureTimestamp]]" multiplier="1000"></hz-time>
+                            <span>{{connection.from.station.name}}</span>
+                        </div>
+                        <div>
+                            <hz-time timestamp="[[connection.to.arrivalTimestamp]]" multiplier="1000"></hz-time>
+                            <span>{{connection.to.station.name}}</span>
+                        </div>
+                    </paper-item-body>
+                    <hz-train-indicator connection="[[connection]]"></hz-train-indicator>
+                </paper-item>
+            </template>
+        </iron-list>
+        </paper-material>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'hz-home',
+
+            _not: function(a){
+                return !a;
+            },
+
+            _getUrl: function (appendix) {
+                var BASEURL = "http://localhost:8888";
+                return BASEURL + appendix;
+            },
+
+            properties: {
+                loading: {
+                    type: Boolean,
+                    value: false,
+                },
+                notloading: {
+                    type: Boolean,
+                    computed: '_not(loading)',
+                },
+                start: {
+                    type: String,
+                    value: "Basel",
+                },
+                end: {
+                    type: String,
+                    value: "Bern",
+                },
+                date: {
+                    type: Number,
+                    value: function () {
+                        return new Date().getTime();
+                    },
+                },
+                time: {
+                    type: Number,
+                    value: function () {
+                        return (new Date().getHours() * 60 + new Date().getMinutes()) * 60 * 1000;
+                    },
+                },
+                response: Object,
+                selectedConnection: {
+                    type: Object,
+                    notify: true,
+                },
+            },
+
+            behaviors: [
+                Polymer.NeonAnimatableBehavior
+            ],
+
+            _cannotSearch: function (start, end) {
+                if (!!start && !!end) {
+                    return false;
+                } else {
+                    return true;
+                }
+            },
+
+            search: function () {
+                var d = moment(this.date);
+                d.startOf('day');
+                d.add(this.time, 'milliseconds');
+                this.$.ajax.params = {
+                    'from': this.start,
+                    'to': this.end,
+                    'date': d.format("YYYY-MM-DD"),
+                    'time': d.format("HH:mm"),
+                    'limit': 6,
+                };
+                this.$.ajax.generateRequest();
+            },
+
+            _onItemClick: function (event) {
+                this.set('selectedConnection', event.model.connection);
+                this.fire('connection-selected');
+            },
+            _onClose: function () {
+                this.$.pages.selected = 0;
+            },
+
+
+        });
+    </script>
+</dom-module>

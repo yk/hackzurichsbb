@@ -1,0 +1,77 @@
+<link rel="import" href="/bower/polymer/polymer.html"/>
+<link rel="import" href="/bower/paper-item/paper-item.html"/>
+<link rel="import" href="/bower/paper-item/paper-icon-item.html"/>
+<link rel="import" href="/bower/paper-item/paper-item-body.html"/>
+<link rel="import" href="/bower/iron-icon/iron-icon.html"/>
+<link rel="import" href="/bower/paper-dialog/paper-dialog.html"/>
+<link rel="import" href="/bower/paper-button/paper-button.html"/>
+<link rel="import" href="/bower/paper-icon-button/paper-icon-button.html"/>
+<link href="/bower/iron-icons/iron-icons.html" rel="import">
+<link rel="import" href="/bower/paper-badge/paper-badge.html"/>
+<link rel="import" href="/bower/firebase-element/firebase-collection.html"/>
+
+<dom-module id="hz-feedback-counter">
+    <style>
+        .with-badge{
+            margin-right: 2em;
+        }
+        paper-badge{
+            margin-left: 0.3em;
+        }
+    </style>
+    <template>
+        <firebase-document location="[[_fbPath(section)]]" data="{{feedbacks}}"></firebase-document>
+        <div class="with-badge" on-click="_feedback">
+            <iron-icon icon="[[_icon(feedbacks)]]"></iron-icon>
+            <paper-badge label="[[_nmbr(feedbacks)]]"></paper-badge>
+        </div>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'hz-feedback-counter',
+
+            properties: {
+                section: Object,
+                feedbacks: Object,
+            },
+
+            _nmbr: function(feedbacks){
+                if(!!feedbacks){
+                    return Object.keys(feedbacks).length;
+                }
+                return 0;
+            },
+
+            _icon: function(fdbcks){
+                if(!!fdbcks){
+                    var count = 0;
+                    _.forEach(_.values(fdbcks), function(f){
+                        if(f == 'full' || f == 'restricted'){
+                            count += 1;
+                        }else{
+                            count -= 1;
+                        }
+                    });
+                    if(count >= 0){
+                        return "thumb-up";
+                    }else{
+                        return "thumb-down";
+                    }
+                }
+                return "thumb-up";
+            },
+
+            _fbPath: function(section){
+                if(!section)
+                    return null;
+                return "https://hackzurichsbb.firebaseio.com/train/" + section.journey.name.replace(/\s/g,'-');
+            },
+
+            _feedback: function(){
+                this.fire('show-feedback-list', {section:this.section});
+            },
+
+        });
+    </script>
+</dom-module>

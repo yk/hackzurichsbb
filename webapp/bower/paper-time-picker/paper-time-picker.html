@@ -1,0 +1,243 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-media-query/iron-media-query.html">
+<link rel="import" href="../iron-resizable/iron-resizable-behavior.html">
+<link rel="import" href="../iron-selector/iron-selector.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../paper-styles/paper-styles.html">
+<link rel="import" href="paper-clock-selector.html">
+
+<!--
+
+[Material Design Pickers](http://www.google.com/design/spec/components/pickers.html)
+
+Provides a responsive time picker based on the material design spec. This
+component aims to be a clone of the time picker introduced in Android Lollipop.
+
+## Examples:
+
+Default picker:
+
+    <paper-time-picker></paper-time-picker>
+
+Setting the initial time to 4:20pm (note that hours given as 24-hour):
+
+    <paper-time-picker hour="16" minute="20"></paper-time-picker>
+
+If you include this element as part of `paper-dialog`, use the class
+`"paper-time-picker-dialog"` on the dialog in order to give it proper styling.
+
+    <paper-action-dialog id="dialog" modal class="paper-time-picker-dialog">
+      <paper-time-picker id="timePicker"></paper-time-picker>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm>OK</paper-button>
+      </div>
+    </paper-action-dialog>
+
+@element paper-time-picker
+@blurb Provides a responsive time picker based on the material design spec.
+@homepage http://bendavis78.github.io/paper-time-picker/
+@demo demo/index.html
+
+-->
+
+<style is="custom-style">
+  /* Allow easy styling of paper-time-picker-dialog */
+  :root .paper-time-picker-dialog {
+    margin: 0;
+    max-height: 520px !important;
+  }
+  :root .paper-time-picker-dialog > paper-time-picker {
+    margin-top: 0;
+    margin-bottom: 0;
+    padding: 0;
+  }
+</style>
+
+<dom-module id="paper-time-picker">
+  <link rel="import" type="css" href="paper-time-picker.css">
+  <template>
+    <iron-media-query query="{{_getMediaQuery(forceNarrow, responsiveWidth)}}" query-matches="{{_queryMatches}}"></iron-media-query>
+    <div id="timePicker">
+      <div id="heading">
+        <iron-selector class="time" id="timeParts" selectable="[name]" attr-for-selected="name" selected="{{_page}}">
+          <div name="hour" class="hour">{{_twelveHour(hour)}}</div>
+          <div class="sep">:</div>
+          <div name="minute" class="minute">{{_zeroPad(minute, 2)}}</div>
+          <div class="period" self-end on-tap="togglePeriod">{{period}}</div>
+        </iron-selector>
+      </div>
+      <div id="clockArea">
+        <iron-selector id="periodSelector" selected="{{period}}" attr-for-selected="name">
+          <div class="period" name="AM">AM</div>
+          <div class="period" name="PM">PM</div>
+        </iron-selector>
+        <iron-selector id="selectors" selected="{{_page}}" attr-for-selected="name" activate-event="">
+          <section name="hour" id$="selectHour">
+            <paper-clock-selector id="hourSelector" count="12" selected="{{hour12}}"></paper-clock-selector> 
+          </section>
+          <section name="minute" id$="selectMinute">
+            <paper-clock-selector id="minuteSelector" count="60" selected="{{minute}}" zero-pad use-zero></paper-clock-selector>
+          </section>
+        </iron-selector>
+      </div>
+    </div>
+  </template>
+  <script>
+    (function() {
+      Polymer({
+        is: 'paper-time-picker',
+        properties: {
+          /**
+           * The selected time (HH:MM)
+           * @attribute time
+           * @type String
+           * @default '00:00'
+          */
+          time: {
+            type: String,
+            value: '00:00'
+          },
+          /**
+           * Maximum screen width at which the picker uses a vertical layout
+           * @attribute responsiveWidth
+           * @type string
+           * @default '640px'
+           */
+          responsiveWidth: {
+            type: String,
+            value: '640px'
+          },
+          /**
+           * Force narrow layout
+           * @attribute forceNarrow
+           * @type boolean
+           * @default false
+           */
+          forceNarrow: {
+            type: Boolean,
+            value: false
+          },
+          narrow: {
+            type: Boolean,
+            reflectToAttribute: true,
+            value: false,
+            notify: true,
+          },
+          isTouch: {
+            type: Boolean,
+            value: false,
+            reflectToAttribute: true
+          },
+          hour: {
+            type: Number,
+            value: 0,
+            observer: '_hourChanged'
+          },
+          hour12: {
+            type: Number,
+            value: 0,
+            observer: '_hour12Changed'
+          },
+          minute: {
+            type: Number,
+            value: 0,
+            observer: '_minuteChanged'
+          },
+          period: {
+            type: String,
+            value: 'AM',
+            observer: '_periodChanged'
+          },
+          _queryMatches: {
+            type: Boolean,
+            value: false,
+            observer: '_computeNarrow'
+          }
+        },
+        behaviors: [
+          Polymer.IronResizableBehavior
+        ],
+        ready: function() {
+          this.isTouch = 'ontouchstart' in window;
+          this._page = 'hour';
+          this.addEventListener('paper-clock-selected', this._timeSelected);
+        },
+        /**
+         * Get/set the selected time
+         * @attribute time
+         * @type String
+         * @default '00:00'
+         */
+        get time() {
+          var hour = this.hour % 12 || 12;
+          var minute = ('0' + this.minute).substr(-2);
+          return hour + ':' + minute + ' ' + this.period;
+        },
+        set time(timeString) {
+          var pattern = /^\s*(\d{1,2}):?(\d{2})(\s*([AaPp])\.?[Mm]\.?|[A-Z])?\s*$/;
+          var match = timeString.match(pattern);
+          if (!match) {
+            throw "Invalid time";
+          }
+          var hour = parseInt(match[1]);
+          var minute = parseInt(match[2]);
+          var period = match[4] ? match[4].toLowerCase() : null;
+          if (period == 'p' && hour <= 12) {
+            hour = (hour + 12) % 24;
+          }
+          this.set('hour', hour);
+          this.set('minute', minute);
+        },
+        togglePeriod: function() {
+          this.period = (this.period == 'AM') ? 'PM' : 'AM';
+        },
+        _hour12Changed: function(hour12) {
+          var add = (this.period == 'PM' ? 12 : 0);
+          this.hour = ((hour12 % 12) + add) % 24;
+        },
+        _hourChanged: function(hour, oldValue) {
+          if (isNaN(parseInt(hour))) {
+            throw "Invalid number";
+          }
+          hour = parseFloat(hour) % 24;
+          this.hour12 = this._twelveHour(hour);
+          this.period = ['PM', 'AM'][+(hour < 12)];
+          this.hour = hour;
+          this.fire('time-changed', {hour: this.hour, minute: this.minute});
+        },
+        _minuteChanged: function(minute, oldValue) {
+          if (isNaN(minute)) {
+            throw "Invalid number";
+          }
+          this.minute = Math.round(minute) % 60;
+        },
+        _timeChanged: function() {
+          this.fire('time-changed', {hour: this.hour, minute: this.minute});
+        },
+        _periodChanged: function(period) {
+          this.hour += (period == 'PM') ? 12 : -12;
+        },
+        _zeroPad: function(value, length) {
+          if (value === undefined || isNaN(value) || isNaN(length)) return;
+          return ('0' + value).substr(-length);
+        },
+        _twelveHour: function(hour) {
+          return hour % 12 || 12;
+        },
+        _isEqual: function(a, b) {
+          return a == b;
+        },
+        _getMediaQuery: function(forceNarrow, responsiveWidth) {
+          return '(max-width: ' + (forceNarrow ? '' : responsiveWidth) + ')';
+        },
+        _computeNarrow: function() {
+          this.set('narrow', this._queryMatches || this.forceNarrow);
+        },
+        _timeSelected: function(e) {
+          this._page = 'minute';
+        }
+      });
+    })();
+  </script>
+</dom-module>

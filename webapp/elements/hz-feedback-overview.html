@@ -1,0 +1,84 @@
+<link rel="import" href="/bower/neon-animation/neon-animatable-behavior.html"/>
+<link rel="import" href="/bower/firebase-element/firebase-collection.html"/>
+<link rel="import" href="/bower/firebase-element/firebase-document.html"/>
+<link rel="import" href="/bower/iron-form/iron-form.html"/>
+<link rel="import" href="/bower/iron-ajax/iron-ajax.html"/>
+<link rel="import" href="/bower/iron-list/iron-list.html"/>
+<link rel="import" href="/bower/paper-card/paper-card.html"/>
+<link rel="import" href="/bower/paper-input/paper-input.html"/>
+<link rel="import" href="/bower/paper-typeahead-input/paper-typeahead-input.html"/>
+<link rel="import" href="/bower/paper-button/paper-button.html"/>
+<link rel="import" href="/bower/paper-item/paper-item.html"/>
+<link rel="import" href="/bower/paper-material/paper-material.html"/>
+<link rel="import" href="/bower/paper-item/paper-item-body.html"/>
+<link rel="import" href="/bower/neon-animation/neon-animated-pages.html"/>
+<link rel="import" href="/bower/neon-animation/neon-animations.html"/>
+
+<link rel="import" href="/elements/hz-date-time.html"/>
+<link rel="import" href="/elements/hz-time.html"/>
+<link rel="import" href="/elements/hz-date-picker.html"/>
+<link rel="import" href="/elements/hz-time-picker.html"/>
+<link rel="import" href="/elements/hz-train-indicator.html"/>
+
+<dom-module id="hz-feedback-overview">
+    <style>
+      #cards {
+        @apply(--layout-vertical);
+        @apply(--center-justified);
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      paper-card {
+        width: 100%;
+        margin-bottom: 16px;
+      }
+    </style>
+    <template>
+      <firebase-collection
+        location="https://hackzurichsbb.firebaseio.com/feedback"
+        order-by-child="name time"
+        data="{{feedback}}"></firebase-collection>
+      <template is="dom-repeat" items="[[feedback]]" as="feedback">
+        <div id="cards">
+          <paper-card>
+            <div class="card-content">
+              <h4><span>[[feedback.departureName]]</span> -&gt; <span>[[feedback.arrivalName]]</span></h4>
+              <table>
+                <tr>
+                  <td>Train:</td>
+                  <td><span>[[feedback.name]]</span></td>
+                </tr>
+                <tr>
+                  <td>Departure Time:</td>
+                  <td><hz-date-time timestamp="[[feedback.departureTimestamp]]" multiplier="1000"></td>
+                </tr>
+                <tr>
+                  <td>Arrival Time:</td>
+                  <td><hz-date-time timestamp="[[feedback.arrivalTimestamp]]" multiplier="1000"></td>
+                </tr>
+                <tr>
+                  <td>Feedback:</td>
+                  <td><span>[[feedback.feedback]]</span></td>
+                </tr>
+                <tr>
+                  <td>Comment:</td>
+                  <td><span>[[feedback.comment]]</span></td>
+                </tr>
+              </table>
+            </div>
+          </paper-card>
+        </div>
+      </template>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'hz-feedback-overview',
+            behaviors: [
+                Polymer.NeonAnimatableBehavior
+            ],
+        });
+    </script>
+</dom-module>

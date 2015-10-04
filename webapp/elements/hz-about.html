@@ -1,0 +1,67 @@
+<link rel="import" href="/bower/neon-animation/neon-animatable-behavior.html"/>
+<link rel="import" href="/bower/iron-form/iron-form.html"/>
+<link rel="import" href="/bower/iron-ajax/iron-ajax.html"/>
+<link rel="import" href="/bower/iron-list/iron-list.html"/>
+<link rel="import" href="/bower/paper-card/paper-card.html"/>
+<link rel="import" href="/bower/paper-input/paper-input.html"/>
+<link rel="import" href="/bower/paper-typeahead-input/paper-typeahead-input.html"/>
+<link rel="import" href="/bower/paper-button/paper-button.html"/>
+<link rel="import" href="/bower/paper-item/paper-item.html"/>
+<link rel="import" href="/bower/paper-material/paper-material.html"/>
+<link rel="import" href="/bower/paper-item/paper-item-body.html"/>
+<link rel="import" href="/bower/neon-animation/neon-animated-pages.html"/>
+<link rel="import" href="/bower/neon-animation/neon-animations.html"/>
+
+<link rel="import" href="/elements/hz-time.html"/>
+<link rel="import" href="/elements/hz-date-picker.html"/>
+<link rel="import" href="/elements/hz-time-picker.html"/>
+<link rel="import" href="/elements/hz-train-indicator.html"/>
+
+<dom-module id="hz-about">
+    <style>
+      #cards {
+        @apply(--layout-vertical);
+        @apply(--center-justified);
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      paper-card {
+        width: 100%;
+        margin-bottom: 16px;
+      }
+    </style>
+
+    <template>
+      <div id="cards">
+        <paper-card heading="Yannic Kilcher">
+          <div class="card-content"></div>
+        </paper-card>
+      </div>
+      <div id="cards">
+        <paper-card heading="Ruben Wolff">
+          <div class="card-content"></div>
+        </paper-card>
+      </div>
+      <div id="cards">
+        <paper-card heading="Jochen Zehnder">
+          <div class="card-content"></div>
+        </paper-card>
+      </div>
+      <div id="cards">
+        <paper-card heading="Philipp Zehnder">
+          <div class="card-content"></div>
+        </paper-card>
+      </div>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'hz-about',
+            behaviors: [
+                Polymer.NeonAnimatableBehavior
+            ],
+        });
+    </script>
+</dom-module>

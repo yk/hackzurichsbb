@@ -1,0 +1,92 @@
+<link rel="import" href="/bower/polymer/polymer.html"/>
+<link rel="import" href="/bower/paper-input/paper-input.html"/>
+<link rel="import" href="/bower/paper-item/paper-item.html"/>
+<link rel="import" href="/bower/paper-item/paper-icon-item.html"/>
+<link rel="import" href="/bower/paper-item/paper-item-body.html"/>
+<link rel="import" href="/bower/iron-icon/iron-icon.html"/>
+<link rel="import" href="/bower/paper-dialog/paper-dialog.html"/>
+<link rel="import" href="/bower/paper-button/paper-button.html"/>
+<link rel="import" href="/bower/paper-toast/paper-toast.html"/>
+
+<dom-module id="hz-section-sentences">
+    <style>
+        #lists{
+            margin: 0 2em;
+        }
+        .sbbicon{
+            display: inline-block;
+            width: 1.3em;
+            height:1.3em;
+            border: 1px solid black;
+            border-radius: 50%;
+            text-align: center;
+        }
+    </style>
+    <template>
+        <paper-dialog id="dialog" modal>
+            <h2>Info:&nbsp;<span>[[_title(section)]]</span></h2>
+            <paper-dialog-scrollable>
+                <div id="lists">
+                <h3>Train accessibility</h3>
+                <ul>
+                    <template is="dom-repeat" items="[[section.pdflist]]">
+                        <li>{{item}}</li>
+                    </template>
+                </ul>
+                <h3>Departure station accessibility</h3>
+                <ul>
+                    <template is="dom-repeat" items="[[section.deplist]]">
+                        <li>{{item}}</li>
+                    </template>
+                </ul>
+                <h3>Arrival station accessibility</h3>
+                <ul>
+                    <template is="dom-repeat" items="[[section.arrlist]]">
+                        <li>{{item}}</li>
+                    </template>
+                </ul>
+                    <h3>SBB Recommendation</h3>
+                    <ul>
+                        <li>The SBB classifies this train as <span class="sbbicon">[[_icon(section)]]</span>.</li>
+                    </ul>
+                    </div>
+            </paper-dialog-scrollable>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Cancel</paper-button>
+            </div>
+        </paper-dialog>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'hz-section-sentences',
+
+            properties: {
+                section: Object,
+            },
+
+            _icon: function(section){
+                var arval = section.arrival.handicappedAccess;
+                var deval = section.departure.handicappedAccess;
+                var hval = Math.min(Number(arval),Number(deval));
+                var hstring = ['unknown',
+                    'full',
+                    'restricted',
+                    'assisted',
+                    'none'][hval]
+                return window.get_handicap_icon(hstring);
+            },
+
+            _title: function(section){
+                if(!section)
+                    return "";
+                return section.departure.station.name + " - " + section.arrival.station.name;
+            },
+
+            open: function(){
+                this.$.dialog.open();
+            },
+
+        });
+    </script>
+</dom-module>

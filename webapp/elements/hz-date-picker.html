@@ -1,0 +1,70 @@
+<link rel="import" href="/bower/polymer/polymer.html"/>
+
+<link rel="import" href="/bower/paper-input/paper-input.html"/>
+<link rel="import" href="/bower/polymer-paper-date-picker/paper-date-picker.html"/>
+<link rel="import" href="/bower/paper-dialog/paper-dialog.html"/>
+<link rel="import" href="/bower/paper-button/paper-button.html"/>
+
+<dom-module id="hz-date-picker">
+    <template>
+        <paper-input name="[[name]]" label="[[label]]" value="[[_asString(date)]]" readonly
+                     on-click="openDialog"></paper-input>
+        <paper-dialog id="dialog" modal class="paper-date-picker-dialog">
+            <paper-date-picker id="datePicker" date="{{date}}"></paper-date-picker>
+            <div class="buttons">
+                <paper-button dialog-confirm>OK</paper-button>
+            </div>
+        </paper-dialog>
+    </template>
+    <script>
+
+        Polymer({
+
+            is: 'hz-date-picker',
+
+            properties: {
+                name: String,
+                label: String,
+                date: {
+                    type: Date,
+                    value: function () {
+                        return new Date();
+                    },
+                    notify: true,
+                    observer: '_dateChanged',
+                },
+                value: {
+                    type: Number,
+                    value: function () {
+                        return new Date().getTime();
+                    },
+                    notify: true,
+                    observer: '_valueChanged',
+                },
+            },
+
+            _asString: function (date) {
+                return date ? moment(date).format("dddd, DD.MM.YYYY") : '';
+            },
+
+            _dateChanged: function (date) {
+                this.value = date.getTime();
+            },
+
+            _valueChanged: function (value) {
+                this.date = new Date(value);
+            },
+
+            openDialog: function () {
+                this.$.dialog.open();
+            },
+
+            closeDialog: function () {
+                this.$.dialog.close();
+            },
+
+
+        });
+
+    </script>
+</dom-module>

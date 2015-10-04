@@ -1,0 +1,73 @@
+<link rel="import" href="/bower/polymer/polymer.html"/>
+<link rel="import" href="/bower/paper-input/paper-input.html"/>
+<link rel="import" href="/bower/paper-item/paper-item.html"/>
+<link rel="import" href="/bower/paper-item/paper-icon-item.html"/>
+<link rel="import" href="/bower/paper-item/paper-item-body.html"/>
+<link rel="import" href="/bower/iron-icon/iron-icon.html"/>
+<link rel="import" href="/bower/iron-list/iron-list.html"/>
+<link rel="import" href="/bower/paper-dialog/paper-dialog.html"/>
+<link rel="import" href="/bower/paper-button/paper-button.html"/>
+<link rel="import" href="/bower/paper-toast/paper-toast.html"/>
+<link rel="import" href="/bower/firebase-element/firebase-collection.html"/>
+
+<link rel="import" href="/elements/hz-handicap.html"/>
+<link rel="import" href="/elements/hz-date-time.html"/>
+
+<dom-module id="hz-feedback-list">
+    <style>
+        paper-item{
+            border-bottom: 1px solid lightgray;
+            padding-bottom: 0.5em;
+        }
+    </style>
+    <template>
+        <firebase-collection location="https://hackzurichsbb.firebaseio.com/feedback" order-by-child="name"
+                             equal-to="[[section.journey.name]]" data="{{feedbacks}}"></firebase-collection>
+        <paper-dialog id="dialog" modal>
+            <h2>Feedback:&nbsp;<span>[[_title(section)]]</span></h2>
+            <paper-dialog-scrollable>
+                <iron-list items="[[feedbacks]]" as="feedback">
+                    <template>
+                        <paper-item>
+                            <paper-item-body three-line>
+                                <div><hz-handicap code="[[feedback.feedback]]"></hz-handicap></div>
+                                <div secondary>[[_comment(feedback.comment)]]</div>
+                                <div secondary><hz-date-time timestamp="[[feedback.time]]"></hz-date-time></div>
+                            </paper-item-body>
+                        </paper-item>
+                    </template>
+                </iron-list>
+            </paper-dialog-scrollable>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Ok</paper-button>
+            </div>
+        </paper-dialog>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'hz-feedback-list',
+
+            properties: {
+                section: Object,
+            },
+
+            _title: function (section) {
+                if (!section)
+                    return "";
+                return section.departure.station.name + " - " + section.arrival.station.name;
+            },
+
+            _comment: function(comment){
+                if(!comment)
+                    return "(no comment)";
+                return comment;
+            },
+
+            open: function () {
+                this.$.dialog.open();
+            },
+
+        });
+    </script>
+</dom-module>

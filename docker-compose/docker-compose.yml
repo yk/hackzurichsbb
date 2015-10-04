@@ -1,0 +1,12 @@
+transport:
+  image: reisepass/open-sbb-hackzurich
+  ports:
+    - "8008:80"
+backend:
+  image: elft3r/backend
+  ports:
+    - "8888:8888"
+frontend:
+  image: elft3r/frontend
+  ports:
+    - "8080:8080"

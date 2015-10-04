@@ -1,0 +1,110 @@
+<link rel="import" href="/bower/polymer/polymer.html"/>
+<link rel="import" href="/bower/paper-input/paper-input.html"/>
+<link rel="import" href="/bower/paper-item/paper-item.html"/>
+<link rel="import" href="/bower/paper-item/paper-icon-item.html"/>
+<link rel="import" href="/bower/paper-item/paper-item-body.html"/>
+<link rel="import" href="/bower/iron-icon/iron-icon.html"/>
+<link rel="import" href="/bower/paper-dialog/paper-dialog.html"/>
+<link rel="import" href="/bower/paper-button/paper-button.html"/>
+<link rel="import" href="/bower/paper-toast/paper-toast.html"/>
+
+<dom-module id="hz-feedback">
+    <style>
+        #fb-buttons {
+            margin-top: 1em;
+            margin-left: 2em;
+            margin-right: 2em;
+        }
+
+        #comment {
+            margin-top: 1em;
+            margin-left: 2em;
+            margin-right: 2em;
+        }
+    </style>
+    <template>
+        <paper-dialog id="dialog" modal>
+            <h2>Feedback:&nbsp;<span>[[_title(section)]]</span></h2>
+            <paper-dialog-scrollable>
+                <label>How handicapped-accessible was this ride?</label>
+
+                <div layout vertical id="comment">
+                    <paper-input label="Comment (optional)" value="{{comment}}"></paper-input>
+                </div>
+                <div layout horizontal id="fb-buttons">
+                    <paper-button raised on-click="_clickFull">Fully accessible</paper-button>
+                    <paper-button raised on-click="_clickRestricted">Difficult</paper-button>
+                    <paper-button raised on-click="_clickAssisted">Reservation needed</paper-button>
+                    <paper-button raised on-click="_clickNone">Inaccessible</paper-button>
+                </div>
+            </paper-dialog-scrollable>
+            <div class="buttons">
+                <paper-button dialog-dismiss>Cancel</paper-button>
+            </div>
+        </paper-dialog>
+
+        <paper-toast id="toast" text="Thank You for helping us!"></paper-toast>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'hz-feedback',
+
+            properties: {
+                section: Object,
+                comment: String,
+            },
+
+            _feedback: function (handicap) {
+                this.$.dialog.close();
+                var t = new Date().getTime();
+                var el = {
+                    time: t,
+                    feedback: handicap,
+                    name: this.section.journey.name,
+                    departureName: this.section.departure.station.name,
+                    departureId: this.section.departure.station.id,
+                    departureTimestamp: this.section.departure.departureTimestamp,
+                    arrivalName: this.section.arrival.station.name,
+                    arrivalId: this.section.arrival.station.id,
+                    arrivalTimestamp: this.section.arrival.arrivalTimestamp,
+                    comment: this.comment,
+                };
+                new Firebase("https://hackzurichsbb.firebaseIO.com/feedback/" + t).set(el);
+                new Firebase("https://hackzurichsbb.firebaseIO.com/train/" + this.section.journey.name.replace(/\s/g, "-") + '/' + new Date().getTime()).set(handicap);
+
+                this.$.toast.show();
+            },
+
+            _clickFull: function () {
+                this._feedback('full');
+            },
+            _clickRestricted: function () {
+                this._feedback('restricted');
+            },
+            _clickAssisted: function () {
+                this._feedback('assisted');
+            },
+            _clickNone: function () {
+                this._feedback('none');
+            },
+
+            _getClasses: function (section) {
+                var color = window.get_handicap_color(section.handicap);
+                return "avatar " + color;
+            },
+
+            _title: function (section) {
+                if (!section)
+                    return "";
+                return section.departure.station.name + " - " + section.arrival.station.name;
+            },
+
+            open: function () {
+                this.comment = "";
+                this.$.dialog.open();
+            },
+
+        });
+    </script>
+</dom-module>

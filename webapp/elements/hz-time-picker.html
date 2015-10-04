@@ -1,0 +1,74 @@
+<link rel="import" href="/bower/polymer/polymer.html"/>
+
+<link rel="import" href="/bower/paper-input/paper-input.html"/>
+<link rel="import" href="/bower/paper-dialog/paper-dialog.html"/>
+<link rel="import" href="/bower/paper-button/paper-button.html"/>
+
+<link rel="import" href="/elements/hz-time-picker-inside.html"/>
+
+
+<dom-module id="hz-time-picker">
+    <template>
+        <paper-input name="[[name]]" label="[[label]]" value="[[_asString(hour, minute)]]" readonly
+                     on-click="openDialog"></paper-input>
+        <paper-dialog id="dialog" modal class="paper-time-picker-dialog">
+            <hz-time-picker-inside id="timePicker" value="{{value}}" hour="{{hour}}"
+                                   minute="{{minute}}"></hz-time-picker-inside>
+            <div class="buttons">
+                <paper-button dialog-confirm>OK</paper-button>
+            </div>
+        </paper-dialog>
+    </template>
+    <script>
+
+        Polymer({
+
+            is: 'hz-time-picker',
+
+            properties: {
+                name: String,
+                label: String,
+                value: {
+                    type: Number,
+                    notify: true,
+                    value: function () {
+                        return (new Date().getHours() * 60 + new Date().getMinutes()) * 60 * 1000;
+                    },
+                },
+                hour: {
+                    type: Number,
+                    notify: true,
+                    value: function () {
+                        return new Date().getHours();
+                    },
+                },
+                minute: {
+                    type: Number,
+                    notify: true,
+                    value: function () {
+                        return new Date().getMinutes();
+                    },
+                },
+            },
+
+            _asString: function (hour, minute) {
+                var d = new Date();
+                d.setHours(hour);
+                d.setMinutes(minute);
+                return moment(d).format('HH:mm');
+            },
+
+
+            openDialog: function () {
+                this.$.dialog.open();
+            },
+
+            closeDialog: function () {
+                this.$.dialog.close();
+            },
+
+
+        });
+
+    </script>
+</dom-module>

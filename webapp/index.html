@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=no">
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <title>HackZurich SBB</title>
+
+    <script src="/bower/webcomponentsjs/webcomponents.min.js"></script>
+    <script src="/bower/underscore/underscore.js"></script>
+    <script src="/bower/underscore-deepclone/dist/underscore.deepclone.js"></script>
+    <script src="/scripts/moment-with-langs.js"></script>
+    <script src="/scripts/timerAndStorage.js"></script>
+
+    <style>
+        .blue {
+            background-color: var(--paper-light-blue-300);
+        }
+        .red {
+            background-color: var(--paper-red-300);
+        }
+        .orange {
+            background-color: var(--paper-amber-300);
+        }
+        .green {
+            background-color: var(--paper-green-300);
+        }
+        .darkgreen {
+            background-color: var(--paper-green-800);
+        }
+        .gray{
+            background-color: gray;
+        }
+    </style>
+
+    <script>
+        window.get_handicap_color = function(handicap){
+            if(handicap == 'full'){
+                return 'green';
+            }
+            if(handicap == 'restricted'){
+                return 'darkgreen';
+            }
+            if(handicap == 'assisted'){
+                return 'orange';
+            }
+            if(handicap == 'none'){
+                return 'red';
+            }
+            return 'gray';
+        };
+        window.get_handicap_icon = function(handicap){
+            if(handicap == 'full'){
+                return '✓';
+            }
+            if(handicap == 'restricted'){
+                return '(✓)';
+            }
+            if(handicap == 'assisted'){
+                return '!';
+            }
+            if(handicap == 'none'){
+                return '✕';
+            }
+            return '?';
+        };
+    </script>
+
+    <link rel="import" href="/bower/polymer/polymer.html"/>
+
+    <link rel="import" href="/elements/hz-app.html"/>
+
+
+</head>
+<body unresolved fullbleed layout vertical>
+<hz-app></hz-app>
+</body>

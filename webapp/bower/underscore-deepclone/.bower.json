@@ -1,0 +1,14 @@
+{
+  "name": "underscore-deepclone",
+  "homepage": "https://github.com/mateusmaso/underscore.deepclone",
+  "version": "0.1.1",
+  "_release": "0.1.1",
+  "_resolution": {
+    "type": "version",
+    "tag": "0.1.1",
+    "commit": "e2550a28486d10191060c8784da75708eccc161f"
+  },
+  "_source": "git://github.com/mateusmaso/underscore.deepclone.git",
+  "_target": "*",
+  "_originalSource": "mateusmaso/underscore.deepclone"
+}

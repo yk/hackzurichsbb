@@ -1,0 +1,31 @@
+{
+  "name": "hz",
+  "version": "0.0.0",
+  "authors": [
+    "yk"
+  ],
+  "license": "-",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "webapp/bower/",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer",
+    "iron-elements": "PolymerElements/iron-elements",
+    "paper-elements": "PolymerElements/paper-elements",
+    "gold-elements": "PolymerElements/gold-elements",
+    "neon-elements": "PolymerElements/neon-elements",
+    "google-map": "GoogleWebComponents/google-map",
+    "firebase-element": "GoogleWebComponents/firebase-element",
+    "page": "visionmedia/page.js",
+    "underscore": "*",
+    "underscore-deepclone": "mateusmaso/underscore.deepclone",
+    "polymer-paper-date-picker": "*",
+    "paper-time-picker": "*",
+    "paper-typeahead-input": "*"
+  }
+}

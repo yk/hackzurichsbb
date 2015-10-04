@@ -1,0 +1,93 @@
+<link rel="import" href="/bower/polymer/polymer.html"/>
+<link rel="import" href="/bower/paper-item/paper-item.html"/>
+<link rel="import" href="/bower/paper-item/paper-icon-item.html"/>
+<link rel="import" href="/bower/paper-item/paper-item-body.html"/>
+<link rel="import" href="/bower/iron-icon/iron-icon.html"/>
+
+<link rel="import" href="/elements/hz-time.html"/>
+<link rel="import" href="/elements/hz-feedback-button.html"/>
+<link rel="import" href="/elements/hz-feedback-counter.html"/>
+
+<dom-module id="hz-section">
+    <style>
+        .avatar {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            background: #ccc;
+        }
+
+        .blue {
+            background-color: var(--paper-light-blue-300);
+        }
+
+        .red {
+            background-color: var(--paper-red-300);
+        }
+
+        .orange {
+            background-color: var(--paper-amber-300);
+        }
+
+        .green {
+            background-color: var(--paper-green-300);
+        }
+
+        .darkgreen {
+            background-color: var(--paper-green-800);
+        }
+        [item-icon]{
+            cursor: pointer;
+        }
+        hz-feedback-counter{
+            cursor: pointer;
+        }
+        [self-center]{
+            text-align: center;
+            padding-top: 0.4em;
+            font-size: 1.2em;
+        }
+    </style>
+    <template>
+        <paper-icon-item>
+            <div class$="[[_getClasses(section)]]" item-icon layout vertical on-click="_click"><div self-center>[[_hcLabel(section)]]</div></div>
+            <paper-item-body two-line class="flex">
+                <div>
+                    <hz-time timestamp="[[section.departure.departureTimestamp]]" multiplier="1000"></hz-time>
+                    <span>[[section.departure.station.name]]</span></div>
+                <div>
+                    <hz-time timestamp="[[section.arrival.arrivalTimestamp]]" multiplier="1000"></hz-time>
+                    <span>[[section.arrival.station.name]]</span></div>
+            </paper-item-body>
+            <hz-feedback-counter section="[[section]]"></hz-feedback-counter>
+            <hz-feedback-button section="[[section]]"></hz-feedback-button>
+        </paper-icon-item>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'hz-section',
+
+            properties: {
+                section: Object,
+            },
+
+            _getClasses: function (section) {
+                var color = window.get_handicap_color(section.handicap);
+                return "avatar " + color;
+            },
+
+            _hcLabel: function(section){
+                var label = window.get_handicap_icon(section.handicap);
+                return label;
+            },
+
+            _click: function(){
+                this.fire('show-section-sentences', {section: this.section});
+            },
+
+        });
+    </script>
+</dom-module>
